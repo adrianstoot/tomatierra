@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="es" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PUESTA A TIERRA (PAT) • REBT ITC-BT-18 & CTE DB-SUA 8</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            surface: {
+              950: '#070a13',
+              900: '#0d1322',
+              850: '#131c31',
+              800: '#1b2640',
+              700: '#263558'
+            },
+            accent: {
+              copper: '#f59e0b',
+              amber: '#eab308',
+              sky: '#38bdf8',
+              emerald: '#10b981',
+              rose: '#ef4444'
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- Three.js & OrbitControls for 3D WebGL -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+
+  <!-- Google Fonts: Outfit, Space Grotesk, JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Space+Grotesk:wght@500;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="h-screen w-screen overflow-hidden flex flex-col justify-between bg-surface-950 text-slate-100">
+
+  <!-- ============================================== -->
+  <!-- 1. TOP MINIMALIST APP BAR                      -->
+  <!-- ============================================== -->
+  <header class="h-13 px-3 sm:px-6 flex items-center justify-between glass-ui border-b border-white/5 z-30 shrink-0">
+    
+    <!-- Left: Brand / Course Pill -->
+    <div class="flex items-center gap-3">
+      <span class="w-2.5 h-2.5 rounded-full bg-amber-400 animate-pulse"></span>
+      <div class="flex items-baseline gap-2">
+        <h1 class="text-sm sm:text-base font-bold tracking-tight text-white flex items-center gap-2">
+          PUESTA A TIERRA
+          <span class="text-xs font-normal text-slate-400 hidden sm:inline">• REBT ITC-BT-18 & CTE</span>
+        </h1>
+      </div>
+      <span class="text-[11px] font-mono px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-300 border border-amber-500/20 hidden md:inline">
+        UNE-EN 62561 • EDIFICACIÓN
+      </span>
+    </div>
+
+    <!-- Center: View Mode Switcher Pills -->
+    <div class="flex items-center gap-1 bg-surface-900/90 p-1 rounded-full border border-white/10 text-xs font-medium">
+      <button class="view-mode-btn active-nav-tab px-3 py-1 rounded-full transition-all flex items-center gap-1.5" data-view="slides">
+        <i data-lucide="presentation" class="w-3.5 h-3.5"></i>
+        <span>Diapositivas</span>
+      </button>
+      <button class="view-mode-btn text-slate-400 hover:text-white px-3 py-1 rounded-full transition-all flex items-center gap-1.5 hidden md:flex" data-view="content">
+        <i data-lucide="book-open" class="w-3.5 h-3.5"></i>
+        <span>Temario</span>
+      </button>
+      <button class="view-mode-btn text-slate-400 hover:text-white px-3 py-1 rounded-full transition-all flex items-center gap-1.5" data-view="viewer3d">
+        <i data-lucide="box" class="w-3.5 h-3.5"></i>
+        <span>Laboratorio 3D</span>
+      </button>
+      <button class="view-mode-btn text-slate-400 hover:text-white px-3 py-1 rounded-full transition-all flex items-center gap-1.5 hidden lg:flex" data-view="tools">
+        <i data-lucide="calculator" class="w-3.5 h-3.5"></i>
+        <span>Calculadora R</span>
+      </button>
+      <button class="view-mode-btn text-slate-400 hover:text-white px-3 py-1 rounded-full transition-all flex items-center gap-1.5 hidden sm:flex" data-view="flashcards">
+        <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
+        <span>Fichas 3D</span>
+      </button>
+      <button class="view-mode-btn text-slate-400 hover:text-white px-3 py-1 rounded-full transition-all flex items-center gap-1.5 hidden xl:flex" data-view="checklist">
+        <i data-lucide="check-square" class="w-3.5 h-3.5"></i>
+        <span>Checklist Obra</span>
+      </button>
+      <button class="view-mode-btn text-slate-400 hover:text-white px-3 py-1 rounded-full transition-all flex items-center gap-1.5" data-view="gallery">
+        <i data-lucide="image" class="w-3.5 h-3.5"></i>
+        <span>Galería HD</span>
+      </button>
+    </div>
+
+    <!-- Right: Quick Tools -->
+    <div class="flex items-center gap-1.5 sm:gap-2">
+      <!-- Chapter Mobile Dropdown -->
+      <select id="chapterMobileSelect" class="lg:hidden text-xs bg-surface-850 border border-white/10 text-slate-200 rounded-lg px-2.5 py-1.5 focus:outline-none">
+        <!-- Injected by JS -->
+      </select>
+
+      <!-- TEST BUTTON (HERO ACTION) -->
+      <button 
+        id="openTestBtn" 
+        class="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-black font-semibold text-xs transition-all shadow-lg shadow-amber-500/20 active:scale-95">
+        <i data-lucide="check-circle-2" class="w-3.5 h-3.5"></i>
+        <span>Tipo Test</span>
+      </button>
+
+      <!-- Fullscreen Toggle -->
+      <button 
+        id="fullscreenBtn" 
+        title="Pantalla Completa (F)"
+        class="p-2 text-slate-400 hover:text-white rounded-full hover:bg-white/5 transition-colors">
+        <i data-lucide="maximize" class="w-4 h-4"></i>
+      </button>
+
+      <!-- Theme Toggle -->
+      <button 
+        id="themeToggleBtn" 
+        title="Alternar Tema"
+        class="p-2 text-slate-400 hover:text-white rounded-full hover:bg-white/5 transition-colors">
+        <i data-lucide="sun" class="w-4 h-4 hidden dark:block"></i>
+        <i data-lucide="moon" class="w-4 h-4 block dark:hidden"></i>
+      </button>
+    </div>
+
+  </header>
+
+  <!-- Secondary Chapter Pills Bar (For Slides & Content) -->
+  <nav class="h-9 px-4 bg-surface-900/60 border-b border-white/5 flex items-center justify-between shrink-0 overflow-x-auto filmstrip">
+    <div class="flex items-center gap-1" id="chapterPillsContainer">
+      <!-- Injected by JS -->
+    </div>
+    <div class="text-[11px] font-mono text-slate-400 hidden xl:flex items-center gap-3">
+      <span><kbd class="px-1.5 py-0.5 rounded bg-white/10 text-[10px]">←</kbd> <kbd class="px-1.5 py-0.5 rounded bg-white/10 text-[10px]">→</kbd> Diapositivas</span>
+      <span><kbd class="px-1.5 py-0.5 rounded bg-white/10 text-[10px]">B</kbd> Ocultar/Mostrar Tira</span>
+      <span><kbd class="px-1.5 py-0.5 rounded bg-white/10 text-[10px]">F</kbd> Pantalla completa</span>
+      <span>Doble clic: Zoom HD</span>
+    </div>
+  </nav>
+
+  <!-- ============================================== -->
+  <!-- 2. MAIN CONTAINER (VIEW PANES)                 -->
+  <!-- ============================================== -->
+  <main class="flex-1 relative flex flex-col overflow-hidden">
+    
+    <!-- VIEW 1: PRESENTATION SLIDES (MAXIMIZED VIEWPORT - IMAGENES OCUPAN CASI TODO EL ESPACIO) -->
+    <section id="view-slides" class="view-pane w-full h-full flex flex-col justify-between overflow-hidden relative">
+      
+      <!-- Central Slide Display Viewport (Maximizes Width and Height) -->
+      <div id="slideViewportContainer" class="flex-1 w-full h-[calc(100vh-9.5rem)] flex items-center justify-center p-1 sm:p-2 overflow-hidden relative group">
+        
+        <!-- Slide Image Element (Maximized & Sharp) -->
+        <img 
+          id="mainSlideImg" 
+          src="slides/slide-01.png" 
+          alt="Diapositiva Puesta a Tierra" 
+          class="slide-img-viewport fit-contain pointer-events-auto cursor-zoom-in"
+          title="Doble clic para ampliar con zoom interactivo"
+        />
+
+        <!-- Floating Left Navigation Trigger Button -->
+        <button 
+          id="prevSlideBtn" 
+          class="absolute left-3 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full glass-ui border border-white/10 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all hover:scale-105 active:scale-95 shadow-2xl hover:bg-white/15 z-20"
+          title="Diapositiva Anterior (←)">
+          <i data-lucide="chevron-left" class="w-6 h-6"></i>
+        </button>
+
+        <!-- Floating Right Navigation Trigger Button -->
+        <button 
+          id="nextSlideBtn" 
+          class="absolute right-3 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full glass-ui border border-white/10 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all hover:scale-105 active:scale-95 shadow-2xl hover:bg-white/15 z-20"
+          title="Diapositiva Siguiente (→)">
+          <i data-lucide="chevron-right" class="w-6 h-6"></i>
+        </button>
+
+        <!-- Top-Left Minimal Floating HUD Badge -->
+        <div class="absolute top-3 left-3 px-3 py-1.5 rounded-xl glass-ui text-xs font-medium text-slate-200 pointer-events-none border border-white/10 flex items-center gap-2 shadow-xl z-10 backdrop-blur-md">
+          <span id="slideCounterBadge" class="text-amber-400 font-mono font-bold">01 / 15</span>
+          <span class="text-slate-500">|</span>
+          <span id="slideTitleDisplay" class="font-semibold text-slate-100 max-w-[280px] sm:max-w-md truncate">Esquema Funcional</span>
+          <span id="slideNormTag" class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-white/10 text-amber-300 hidden md:inline">REBT ITC-BT-18</span>
+        </div>
+
+        <!-- Top-Right Floating Controls (Zoom HD & Toggle Filmstrip) -->
+        <div class="absolute top-3 right-3 flex items-center gap-1.5 z-10">
+          <button 
+            id="zoomInBtn"
+            title="Ampliar Imagen (Z)"
+            class="px-2.5 py-1.5 rounded-xl glass-ui text-xs font-medium text-slate-200 hover:text-white border border-white/10 flex items-center gap-1.5 hover:bg-white/15 shadow-xl transition-all">
+            <i data-lucide="zoom-in" class="w-3.5 h-3.5 text-amber-400"></i>
+            <span class="hidden sm:inline">Zoom HD</span>
+          </button>
+          <button 
+            id="toggleFilmstripBtn"
+            title="Alternar Tira de Diapositivas (Tecla B)"
+            class="px-2.5 py-1.5 rounded-xl glass-ui text-xs font-medium text-slate-200 hover:text-white border border-white/10 flex items-center gap-1.5 hover:bg-white/15 shadow-xl transition-all">
+            <i data-lucide="sliders-horizontal" class="w-3.5 h-3.5 text-amber-400"></i>
+            <span id="toggleFilmstripText" class="hidden sm:inline">Ocultar Tira (B)</span>
+          </button>
+        </div>
+
+      </div>
+
+      <!-- Bottom Filmstrip Drawer (Collapsible to maximize space) -->
+      <footer id="filmstripDrawer" class="h-20 px-4 bg-surface-900/90 border-t border-white/5 flex items-center gap-3 shrink-0 z-20">
+        <!-- Slide Filmstrip Scroll Track -->
+        <div class="flex-1 flex items-center gap-2 overflow-x-auto filmstrip py-1" id="filmstripContainer">
+          <!-- Injected by JS -->
+        </div>
+      </footer>
+
+    </section>
+
+    <!-- VIEW 2: TEMARIO DIGITALIZADO & NOTAS -->
+    <section id="view-content" class="view-pane hidden w-full h-full flex flex-col md:flex-row overflow-hidden">
+      <!-- Search & Modules View -->
+      <div class="flex-1 flex flex-col overflow-hidden p-4 sm:p-6 space-y-4">
+        <div class="flex items-center justify-between gap-4">
+          <div>
+            <h2 class="font-heading font-bold text-lg sm:text-xl text-white">Temario Técnico Digitalizado</h2>
+            <p class="text-xs text-slate-400">Normativa REBT ITC-BT-18, CTE DB-SUA 8, UNE-EN 62561 y Criterios de Aceptación</p>
+          </div>
+          <div class="w-64 sm:w-80">
+            <input 
+              id="temarioSearchInput" 
+              type="text" 
+              placeholder="Buscar en el temario..." 
+              class="w-full bg-surface-900 border border-white/10 rounded-xl px-3.5 py-2 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-amber-400"
+            />
+          </div>
+        </div>
+
+        <div id="temarioModulesContainer" class="flex-1 overflow-y-auto pr-2 space-y-4">
+          <!-- Injected by JS -->
+        </div>
+      </div>
+    </section>
+
+    <!-- VIEW 3: LABORATORIO 3D WEBGL (THREE.JS) -->
+    <section id="view-viewer3d" class="view-pane hidden w-full h-full flex flex-col overflow-hidden relative">
+      <!-- Top 3D Control Bar -->
+      <div class="h-12 px-4 glass-ui border-b border-white/5 flex items-center justify-between shrink-0 z-10">
+        <div class="flex items-center gap-1.5 sm:gap-2">
+          <span class="text-xs font-semibold text-slate-300 hidden sm:inline">Modelo:</span>
+          <button class="model-3d-btn active-nav-tab text-xs px-3 py-1 rounded-full border border-white/10 flex items-center gap-1.5" data-model="arqueta">
+            <i data-lucide="package" class="w-3.5 h-3.5 text-amber-400"></i>
+            <span>Arqueta y Seccionador</span>
+          </button>
+          <button class="model-3d-btn text-slate-400 hover:text-white text-xs px-3 py-1 rounded-full border border-white/10 flex items-center gap-1.5" data-model="cimentacion">
+            <i data-lucide="grid" class="w-3.5 h-3.5 text-sky-400"></i>
+            <span>Cimentación y Anillo</span>
+          </button>
+          <button class="model-3d-btn text-slate-400 hover:text-white text-xs px-3 py-1 rounded-full border border-white/10 flex items-center gap-1.5" data-model="soldadura">
+            <i data-lucide="flame" class="w-3.5 h-3.5 text-rose-400"></i>
+            <span>Soldadura Aluminotérmica</span>
+          </button>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <!-- Explode Slider -->
+          <div class="hidden md:flex items-center gap-2 text-xs text-slate-400">
+            <span>Vista Despiezada:</span>
+            <input id="explode3dSlider" type="range" min="0" max="100" value="0" class="w-24 h-1 bg-surface-800 rounded-lg cursor-pointer" />
+          </div>
+
+          <!-- Wireframe Toggle -->
+          <button id="wireframe3dBtn" class="p-1.5 text-slate-400 hover:text-white rounded-lg hover:bg-white/5 text-xs flex items-center gap-1 border border-white/10" title="Modo Alámbrico">
+            <i data-lucide="box" class="w-3.5 h-3.5"></i>
+            <span class="hidden sm:inline">Wireframe</span>
+          </button>
+
+          <!-- Auto-Rotate -->
+          <button id="autoRotate3dBtn" class="p-1.5 text-slate-400 hover:text-white rounded-lg hover:bg-white/5 text-xs flex items-center gap-1 border border-white/10" title="Rotación Automática">
+            <i data-lucide="rotate-cw" class="w-3.5 h-3.5"></i>
+            <span class="hidden sm:inline">Giro 360°</span>
+          </button>
+
+          <!-- Reset Camera -->
+          <button id="resetCamera3dBtn" class="p-1.5 text-slate-400 hover:text-white rounded-lg hover:bg-white/5 text-xs flex items-center gap-1 border border-white/10" title="Restablecer Vista">
+            <i data-lucide="camera" class="w-3.5 h-3.5"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- 3D Canvas Area -->
+      <div id="webgl-canvas-container" class="flex-1 w-full h-full relative cursor-grab active:cursor-grabbing">
+        <!-- Floating 3D Instructions Badge -->
+        <div class="absolute bottom-4 left-4 glass-ui px-3 py-2 rounded-xl text-xs text-slate-300 pointer-events-none border border-white/10 space-y-0.5">
+          <div class="font-bold text-amber-300 flex items-center gap-1.5">
+            <i data-lucide="mouse-pointer" class="w-3.5 h-3.5"></i>
+            <span>Controles 3D Interactivos</span>
+          </div>
+          <div class="text-[11px] text-slate-400">Clic izquierdo: Rotar • Clic derecho: Desplazar • Rueda: Zoom</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- VIEW 4: CALCULADORA DE RESISTENCIA REBT -->
+    <section id="view-tools" class="view-pane hidden w-full h-full flex flex-col p-4 sm:p-6 overflow-y-auto space-y-6">
+      <div class="max-w-4xl mx-auto w-full space-y-6">
+        <div>
+          <h2 class="font-heading font-bold text-lg sm:text-xl text-white">Calculadora Oficial de Resistencia de Puesta a Tierra (REBT)</h2>
+          <p class="text-xs text-slate-400">Formulación reglamentaria según ITC-BT-18 Punto 3.2 y Verificación de Seguridad Eléctrica</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          
+          <!-- Left Column: Inputs -->
+          <div class="glass-panel rounded-2xl p-5 border border-white/10 space-y-4">
+            <h3 class="font-heading font-bold text-sm text-amber-300 border-b border-white/5 pb-2">Parámetros del Terreno y Electrodo</h3>
+
+            <div>
+              <label class="block text-xs font-semibold text-slate-300 mb-1">Naturaleza del Terreno (Valores REBT)</label>
+              <select id="calcSoilSelect" class="w-full bg-surface-900 border border-white/10 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-amber-400">
+                <!-- Injected by JS -->
+              </select>
+            </div>
+
+            <div>
+              <label class="block text-xs font-semibold text-slate-300 mb-1">Resistividad Aparente del Suelo (ρ en Ω·m)</label>
+              <input id="calcRhoInput" type="number" value="100" min="5" max="5000" class="w-full bg-surface-900 border border-white/10 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-amber-400" />
+            </div>
+
+            <div>
+              <label class="block text-xs font-semibold text-slate-300 mb-1">Configuración del Sistema de Puesta a Tierra</label>
+              <select id="calcTypeSelect" class="w-full bg-surface-900 border border-white/10 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-amber-400">
+                <option value="picas">Picas Verticales (R = ρ / n·L)</option>
+                <option value="anillo">Conductor Enterrado en Anillo / Zanja (R = 2·ρ / L)</option>
+                <option value="mixto">Combinación Mixta (Anillo + Picas en Paralelo)</option>
+              </select>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="block text-xs font-semibold text-slate-300 mb-1">Longitud Pica (L en m)</label>
+                <input id="calcRodLength" type="number" value="2" min="1" max="10" step="0.5" class="w-full bg-surface-900 border border-white/10 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-amber-400" />
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-slate-300 mb-1">Nº de Picas (n)</label>
+                <input id="calcRodCount" type="number" value="4" min="1" max="20" class="w-full bg-surface-900 border border-white/10 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-amber-400" />
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-xs font-semibold text-slate-300 mb-1">Perímetro Total del Anillo de Cimentación (L en m)</label>
+              <input id="calcLoopLength" type="number" value="48" min="5" max="500" class="w-full bg-surface-900 border border-white/10 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-amber-400" />
+            </div>
+
+            <div class="grid grid-cols-2 gap-3 pt-2 border-t border-white/5">
+              <div>
+                <label class="block text-xs font-semibold text-slate-300 mb-1">Tensión Límite Contacto (U_c)</label>
+                <select id="calcVoltLimit" class="w-full bg-surface-900 border border-white/10 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-amber-400">
+                  <option value="24">24 V (Locales Húmedos/Baños)</option>
+                  <option value="50">50 V (Locales Secos Ordinarios)</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-slate-300 mb-1">Sensibilidad Diferencial (I_Δn)</label>
+                <select id="calcDiffSens" class="w-full bg-surface-900 border border-white/10 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-amber-400">
+                  <option value="0.03">30 mA (Doméstico Alta Sens.)</option>
+                  <option value="0.3">300 mA (Industrial / General)</option>
+                </select>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Right Column: Outputs -->
+          <div class="glass-panel rounded-2xl p-5 border border-white/10 flex flex-col justify-between space-y-4">
+            <div>
+              <h3 class="font-heading font-bold text-sm text-sky-300 border-b border-white/5 pb-2">Diagnóstico y Resultados</h3>
+              
+              <div class="mt-4 space-y-3">
+                <div class="bg-surface-900/80 rounded-xl p-4 border border-white/5">
+                  <span class="text-xs text-slate-400 block">Resistencia Teórica Calculada (R):</span>
+                  <span id="calcResultResistance" class="font-heading font-bold text-3xl text-amber-400 mt-1 block">12.50 Ω</span>
+                  <span id="calcResultFormulaText" class="text-[11px] font-mono text-slate-400 mt-1 block">R = ρ / (n · L)</span>
+                </div>
+
+                <div class="bg-surface-900/80 rounded-xl p-4 border border-white/5">
+                  <span class="text-xs text-slate-400 block">Resistencia Máxima Admisible Reglamentaria (R_máx = U_c / I_Δn):</span>
+                  <span id="calcResultMaxResistance" class="font-heading font-bold text-xl text-slate-200 mt-1 block">800.0 Ω</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Verdict Box -->
+            <div id="calcResultVerdict" class="px-4 py-3 rounded-xl bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 font-bold text-center text-sm">
+              ✓ CONFORME REBT (R ≤ R_máx)
+            </div>
+
+            <!-- Regulatory Note -->
+            <p class="text-[11px] text-slate-500 leading-relaxed italic">
+              * Nota: Aunque el valor teórico de cálculo sea favorable, la ITC-BT-18 prescribe que en tomas para pararrayos se procurará conseguir R &le; 10 &Omega;, y en centros de transformación R &le; 1 &Omega; o valores calculados según tensiones de paso y defecto.
+            </p>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- VIEW 5: FLASHCARDS 3D -->
+    <section id="view-flashcards" class="view-pane hidden w-full h-full flex flex-col p-4 sm:p-6 overflow-y-auto space-y-4">
+      <div class="flex items-center justify-between">
+        <div>
+          <h2 class="font-heading font-bold text-lg sm:text-xl text-white">Fichas Técnicas 3D de Autoevaluación</h2>
+          <p class="text-xs text-slate-400">Haz clic en cada tarjeta para girarla y consultar la solución técnica fundamentada</p>
+        </div>
+      </div>
+
+      <div id="flashcardsContainer" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+        <!-- Injected by JS -->
+      </div>
+    </section>
+
+    <!-- VIEW 6: CHECKLIST DE INSPECCIÓN EN OBRA -->
+    <section id="view-checklist" class="view-pane hidden w-full h-full flex flex-col p-4 sm:p-6 overflow-y-auto space-y-4">
+      <div class="max-w-4xl mx-auto w-full space-y-4">
+        <div class="flex items-center justify-between gap-4">
+          <div>
+            <h2 class="font-heading font-bold text-lg sm:text-xl text-white">Checklist de Control de Calidad en Obra</h2>
+            <p class="text-xs text-slate-400">Protocolo de inspección antes del hormigonado, hincado de picas y ensayos de telurómetro</p>
+          </div>
+          <button id="resetChecklistBtn" class="text-xs px-3 py-1.5 rounded-xl border border-white/10 hover:bg-white/5 text-slate-300">
+            Reiniciar
+          </button>
+        </div>
+
+        <!-- Progress Bar -->
+        <div class="glass-panel p-4 rounded-xl border border-white/10 space-y-2">
+          <div class="flex items-center justify-between text-xs font-semibold">
+            <span class="text-slate-300">Progreso de Inspección</span>
+            <span id="checklistProgressCount" class="text-amber-400 font-mono">0 / 12 (0%)</span>
+          </div>
+          <div class="w-full h-2 rounded-full bg-surface-900 overflow-hidden">
+            <div id="checklistProgressBar" class="h-full bg-gradient-to-r from-amber-500 to-emerald-500 transition-all duration-300" style="width: 0%;"></div>
+          </div>
+        </div>
+
+        <!-- Checklist Items List -->
+        <div id="checklistItemsContainer" class="space-y-2.5">
+          <!-- Injected by JS -->
+        </div>
+      </div>
+    </section>
+
+    <!-- VIEW 7: GALERÍA HD EN CUADRÍCULA -->
+    <section id="view-gallery" class="view-pane hidden w-full h-full flex flex-col p-4 sm:p-6 overflow-y-auto space-y-4">
+      <div>
+        <h2 class="font-heading font-bold text-lg sm:text-xl text-white">Galería Técnica en Alta Definición</h2>
+        <p class="text-xs text-slate-400">Haz clic en cualquier diapositiva para visualizarla en el visor de pantalla completa</p>
+      </div>
+
+      <div id="galleryGridContainer" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+        <!-- Injected by JS -->
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ============================================== -->
+  <!-- 3. MODALS (LIGHTBOX ZOOM & TIPO TEST)           -->
+  <!-- ============================================== -->
+
+  <!-- LIGHTBOX MODAL (INTERACTIVE ZOOM & PAN) -->
+  <div id="lightboxModal" class="fixed inset-0 z-50 hidden bg-black/90 lightbox-modal flex flex-col items-center justify-between p-3 sm:p-6">
+    <!-- Top Bar -->
+    <div class="w-full flex items-center justify-between glass-ui px-4 py-2.5 rounded-2xl border border-white/10 shrink-0">
+      <div class="flex items-center gap-2">
+        <span class="w-2.5 h-2.5 rounded-full bg-amber-400 animate-pulse"></span>
+        <span class="text-xs sm:text-sm font-bold text-white">Visor de Detalle HD (Zoom & Pan)</span>
+      </div>
+
+      <!-- Zoom Range Slider -->
+      <div class="flex items-center gap-3">
+        <span class="text-xs text-slate-400 font-mono hidden sm:inline">Zoom:</span>
+        <input id="lightboxZoomRange" type="range" min="100" max="400" value="100" class="w-28 sm:w-36 h-1.5 bg-surface-800 rounded-lg cursor-pointer" />
+        <span id="lightboxZoomVal" class="text-xs font-mono text-amber-400 w-10 text-right">100%</span>
+        <button id="resetLightboxZoomBtn" class="text-xs px-2.5 py-1 rounded-lg border border-white/10 hover:bg-white/10 text-slate-300">
+          Reset
+        </button>
+      </div>
+
+      <button id="closeLightboxBtn" class="p-1.5 rounded-full hover:bg-white/10 text-slate-400 hover:text-white transition-all">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+    </div>
+
+    <!-- Image Viewport Area -->
+    <div class="flex-1 w-full flex items-center justify-center overflow-hidden my-3 relative select-none">
+      <img 
+        id="lightboxImg" 
+        src="slides/slide-01.png" 
+        alt="Detalle" 
+        class="max-w-full max-h-[85vh] object-contain rounded-xl shadow-2xl transition-transform duration-75 cursor-grab"
+      />
+    </div>
+
+    <!-- Bottom Hints -->
+    <div class="text-[11px] font-mono text-slate-400 glass-ui px-4 py-1.5 rounded-full border border-white/10 pointer-events-none">
+      Arrastra con el ratón para desplazar • Rueda para zoom • Doble clic para reiniciar
+    </div>
+  </div>
+
+  <!-- INTERACTIVE TEST MODAL (TIPO TEST) -->
+  <div id="quizModal" class="fixed inset-0 z-50 hidden bg-black/85 backdrop-blur-md flex items-center justify-center p-3 sm:p-6">
+    <div class="max-w-2xl w-full glass-ui rounded-3xl border border-white/10 shadow-2xl flex flex-col max-h-[90vh] overflow-hidden">
+      
+      <!-- Quiz Header -->
+      <div class="px-5 py-4 border-b border-white/5 flex items-center justify-between shrink-0">
+        <div class="flex items-center gap-3">
+          <div class="w-8 h-8 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center font-bold text-sm">
+            <i data-lucide="award" class="w-4 h-4"></i>
+          </div>
+          <div>
+            <h3 class="font-heading font-bold text-sm sm:text-base text-white">Autoevaluación Oficial • Puesta a Tierra</h3>
+            <span class="text-xs text-slate-400">Pregunta <span id="quizCurrentNum" class="text-amber-400 font-bold">1</span> de <span id="quizTotalNum">18</span></span>
+          </div>
+        </div>
+
+        <button id="closeQuizBtn" class="p-1.5 rounded-full hover:bg-white/10 text-slate-400 hover:text-white transition-all">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- Quiz Progress Bar -->
+      <div class="w-full h-1 bg-surface-900 shrink-0">
+        <div id="quizProgressBar" class="h-full bg-amber-400 transition-all duration-300" style="width: 5%;"></div>
+      </div>
+
+      <!-- Quiz Body -->
+      <div class="p-5 sm:p-6 overflow-y-auto space-y-4 flex-1">
+        <h4 id="quizQuestionText" class="font-heading font-bold text-sm sm:text-base text-slate-100 leading-snug">
+          <!-- Injected by JS -->
+        </h4>
+
+        <!-- Options Container -->
+        <div id="quizOptionsContainer" class="space-y-2.5">
+          <!-- Injected by JS -->
+        </div>
+
+        <!-- Explanation Box (Appears after answer) -->
+        <div id="quizExplanationBox" class="hidden p-4 rounded-2xl bg-surface-900/90 border border-white/10 space-y-3">
+          <div class="flex items-center gap-2 text-xs font-bold text-amber-400">
+            <i data-lucide="info" class="w-4 h-4"></i>
+            <span>Justificación Técnica y Normativa</span>
+          </div>
+          <p id="quizExplanationText" class="text-xs text-slate-300 leading-relaxed font-sans"></p>
+          <div class="pt-2 border-t border-white/5 flex justify-end">
+            <button id="quizSlideLinkBtn" class="text-xs px-3 py-1.5 rounded-lg bg-amber-500/10 text-amber-300 hover:bg-amber-500/20 border border-amber-500/30 flex items-center gap-1.5">
+              <span>Ver Diapositiva</span>
+              <span>→</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Results Box (Appears at the end) -->
+        <div id="quizResultsBox" class="hidden text-center py-6 space-y-4">
+          <div class="w-16 h-16 rounded-full bg-amber-500/20 text-amber-400 mx-auto flex items-center justify-center text-2xl font-bold">
+            🏆
+          </div>
+          <h3 class="font-heading font-bold text-xl text-white">Evaluación Finalizada</h3>
+          <p class="text-xs text-slate-400">Has completado el test técnico de control de ejecución y puesta a tierra.</p>
+          <div class="p-4 rounded-2xl bg-surface-900 border border-white/10 max-w-sm mx-auto">
+            <span class="text-xs text-slate-400 block">Puntuación Obtenida:</span>
+            <span id="quizFinalScore" class="font-heading font-bold text-3xl text-amber-400 mt-1 block">16 / 18</span>
+            <p id="quizScoreMsg" class="text-xs text-slate-300 mt-2 leading-relaxed"></p>
+          </div>
+          <button id="restartQuizBtn" class="px-5 py-2 rounded-full bg-amber-500 hover:bg-amber-400 text-black font-semibold text-xs transition-all shadow-lg shadow-amber-500/20">
+            Repetir Test
+          </button>
+        </div>
+      </div>
+
+      <!-- Quiz Footer -->
+      <div class="px-5 py-3 border-t border-white/5 flex items-center justify-end shrink-0">
+        <button id="quizNextBtn" class="hidden px-5 py-2 rounded-full bg-amber-500 hover:bg-amber-400 text-black font-semibold text-xs transition-all shadow-lg shadow-amber-500/20">
+          Siguiente Pregunta →
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- JavaScript Scripts -->
+  <script src="slides_data.js"></script>
+  <script src="courseData.js"></script>
+  <script src="viewer3d.js"></script>
+  <script src="app.js"></script>
+
+</body>
+</html>
